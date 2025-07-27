@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use App\Http\Controllers\Controller;
 
-
 class AuthController extends Controller
 {
     /**
@@ -71,5 +70,17 @@ class AuthController extends Controller
         return response()->json([
             'token' => $user->createToken('auth-token')->plainTextToken
         ]);
+    }
+
+    /**
+     * Logout user
+     */
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logged out successfully'
+        ], 200);
     }
 }
