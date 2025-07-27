@@ -12,6 +12,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Filters\SelectFilter;
+
 
 class OfficeSpaceResource extends Resource
 {
@@ -24,7 +26,10 @@ class OfficeSpaceResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                ->helperText('fill the name')
+                ->required()
+                ->maxLength(255),
+
+                Forms\Components\TextInput::make('address')
                 ->required()
                 ->maxLength(255),
 
@@ -40,14 +45,14 @@ class OfficeSpaceResource extends Resource
                 Forms\Components\Repeater::make('photos')
                 ->relationship('photos')
                 ->schema([
-                    Forms\Components\FileUpload::make('photos')
+                    Forms\Components\FileUpload::make('photo')
                     ->required()
                 ]),
 
                 Forms\Components\Repeater::make('benefits')
                 ->relationship('benefits')
                 ->schema([
-                    Forms\Components\TextInput::make('benefits')
+                    Forms\Components\TextInput::make('name')
                     ->required()
                 ]),
 
@@ -68,19 +73,17 @@ class OfficeSpaceResource extends Resource
                 ->required(),
 
                 Forms\Components\Select::make('is_open')
-                ->numeric()
-                ->option([
+                ->options([
                     true => 'Open',
-                    false => 'New Open',
+                    false => 'Not Open',
                 ])
                 ->required(),
 
 
-                Forms\Components\Select::make('is_open')
-                ->numeric()
-                ->option([
-                    true => 'Open',
-                    false => 'New Open',
+                Forms\Components\Select::make('is_full_book')
+                ->options([
+                    true => 'Not Available',
+                    false => 'Available',
                 ])
                 ->required(),
             ]);
@@ -90,10 +93,22 @@ class OfficeSpaceResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('name')
+                ->searchable(),
+                Tables\Columns\TextColumn::make('city.name')
+                ->searchable(),
+                Tables\Columns\IconColumn::make('is_full_book')
+                ->boolean()
+                ->trueColor('danger')
+                ->falseColor('success') 
+                ->trueIcon('heroicon-o-x-circle')              
+                ->falseIcon('heroicon-o-check-circle')    
+                ->label('Available')          
             ])
             ->filters([
-                //
+                SelectFilter::make('city_id')
+                    ->label('City')
+                    ->relationship('city', 'name')
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
